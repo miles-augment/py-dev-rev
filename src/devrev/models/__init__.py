@@ -309,6 +309,13 @@ from devrev.models.rev_users import (
     RevUsersUpdateRequest,
     RevUsersUpdateResponse,
 )
+from devrev.models.schemas import (
+    AggregatedSchema,
+    AggregatedSchemaGetRequest,
+    AggregatedSchemaGetResponse,
+    CustomFieldDefinition,
+    CustomSchemaSpecForRead,
+)
 from devrev.models.search import (
     CoreSearchRequest,
     HybridSearchRequest,
@@ -759,6 +766,12 @@ __all__ = [
     "RevUsersUnlinkResponse",
     "RevUsersUpdateRequest",
     "RevUsersUpdateResponse",
+    # Schemas
+    "AggregatedSchema",
+    "AggregatedSchemaGetRequest",
+    "AggregatedSchemaGetResponse",
+    "CustomFieldDefinition",
+    "CustomSchemaSpecForRead",
     # Search
     "SearchNamespace",
     "SearchResult",

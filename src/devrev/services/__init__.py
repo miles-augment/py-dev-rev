@@ -36,6 +36,7 @@ from devrev.services.recommendations import (
 )
 from devrev.services.rev_orgs import AsyncRevOrgsService, RevOrgsService
 from devrev.services.rev_users import AsyncRevUsersService, RevUsersService
+from devrev.services.schemas import AsyncSchemasService, SchemasService
 from devrev.services.search import AsyncSearchService, SearchService
 from devrev.services.slas import AsyncSlasService, SlasService
 from devrev.services.tags import AsyncTagsService, TagsService
@@ -106,6 +107,9 @@ __all__ = [
     # Rev Users
     "RevUsersService",
     "AsyncRevUsersService",
+    # Schemas
+    "SchemasService",
+    "AsyncSchemasService",
     # Search
     "SearchService",
     "AsyncSearchService",

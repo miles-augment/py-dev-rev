@@ -105,6 +105,19 @@ response = client.works.update(
 
 ### Update Custom Fields
 
+If you don't know a field's API name or type, look up the schema first:
+
+```python
+from devrev.models import AggregatedSchemaGetRequest
+
+schema = client.schemas.aggregated_get(AggregatedSchemaGetRequest(leaf_type="ticket"))
+for field in schema.custom_fields:
+    print(field.name, field.field_type, field.base_type)
+```
+
+`AsyncDevRevClient.schemas.aggregated_get` accepts the same request. This call is
+read-only and does not require a work item ID.
+
 Use the prefixed DevRev field names and declare the corresponding fragments in
 `custom_schema_spec`. For example, an organization-specific `tnt__` field uses
 `tenant_fragment=True`. For subtype and app fields, supply `subtype` and `apps`,

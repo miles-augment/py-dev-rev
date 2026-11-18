@@ -40,6 +40,7 @@ from devrev.services.recommendations import (
 )
 from devrev.services.rev_orgs import AsyncRevOrgsService, RevOrgsService
 from devrev.services.rev_users import AsyncRevUsersService, RevUsersService
+from devrev.services.schemas import AsyncSchemasService, SchemasService
 from devrev.services.search import AsyncSearchService, SearchService
 from devrev.services.slas import AsyncSlasService, SlasService
 from devrev.services.tags import AsyncTagsService, TagsService
@@ -163,6 +164,7 @@ class DevRevClient:
         self._parts = PartsService(self._http, parent_client=self)
         self._rev_orgs = RevOrgsService(self._http)
         self._rev_users = RevUsersService(self._http)
+        self._schemas = SchemasService(self._http)
         self._slas = SlasService(self._http)
         self._tags = TagsService(self._http)
         self._timeline_entries = TimelineEntriesService(self._http)
@@ -253,6 +255,11 @@ class DevRevClient:
     def rev_users(self) -> RevUsersService:
         """Access the Rev Users service."""
         return self._rev_users
+
+    @property
+    def schemas(self) -> SchemasService:
+        """Access the Schemas service."""
+        return self._schemas
 
     @property
     def slas(self) -> SlasService:
@@ -491,6 +498,7 @@ class AsyncDevRevClient:
         self._parts = AsyncPartsService(self._http, parent_client=self)
         self._rev_orgs = AsyncRevOrgsService(self._http)
         self._rev_users = AsyncRevUsersService(self._http)
+        self._schemas = AsyncSchemasService(self._http)
         self._slas = AsyncSlasService(self._http)
         self._tags = AsyncTagsService(self._http)
         self._timeline_entries = AsyncTimelineEntriesService(self._http)
@@ -581,6 +589,11 @@ class AsyncDevRevClient:
     def rev_users(self) -> AsyncRevUsersService:
         """Access the Rev Users service."""
         return self._rev_users
+
+    @property
+    def schemas(self) -> AsyncSchemasService:
+        """Access the Schemas service."""
+        return self._schemas
 
     @property
     def slas(self) -> AsyncSlasService:
