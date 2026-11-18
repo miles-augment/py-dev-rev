@@ -147,6 +147,9 @@ class StageUpdate(DevRevBaseModel):
 class CustomSchemaSpec(DevRevBaseModel):
     """Custom schema specification."""
 
+    apps: list[str] | None = Field(default=None, description="App schema names")
+    subtype: str | None = Field(default=None, description="Custom subtype name")
+    tenant_fragment: bool | None = Field(default=None, description="Include the tenant schema")
     validate_required_fields: bool | None = Field(
         default=None,
         description="Whether to validate required custom fields",

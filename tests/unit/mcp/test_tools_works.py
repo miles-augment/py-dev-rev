@@ -5,6 +5,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from devrev.models import CustomSchemaSpec
+from devrev_mcp.server import mcp
 from devrev_mcp.tools.works import (
     devrev_works_count,
     devrev_works_create,
@@ -186,6 +188,27 @@ class TestWorksUpdateTool:
 
         call_kwargs = mock_client.works.update.call_args.kwargs
         assert call_kwargs["priority"] == IssuePriority.P0
+
+    async def test_update_validates_and_forwards_custom_fields(
+        self, mock_ctx, mock_client, monkeypatch
+    ):
+        custom_fields = {"tnt__impacted_environments": ["QA", "Prod"], "tnt__regression": False}
+        mock_client.works.update.return_value = _make_mock_work()
+        monkeypatch.setattr(mcp, "get_context", lambda: mock_ctx)
+
+        await mcp.call_tool(
+            "devrev_works_update",
+            {
+                "id": "ISS-1",
+                "custom_fields": custom_fields,
+                "custom_schema_spec": {"tenant_fragment": True},
+            },
+        )
+
+        mock_client.works.update.assert_awaited_once()
+        call_kwargs = mock_client.works.update.call_args.kwargs
+        assert call_kwargs["custom_fields"] == custom_fields
+        assert call_kwargs["custom_schema_spec"] == CustomSchemaSpec(tenant_fragment=True)
 
 
 class TestWorksDeleteTool:

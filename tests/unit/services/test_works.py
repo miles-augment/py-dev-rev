@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import httpx
 import pytest
 
+from devrev.models import CustomSchemaSpec
 from devrev.models.works import (
     IssuePriority,
     Work,
@@ -129,6 +130,37 @@ class TestWorksService:
 
         assert isinstance(result, Work)
         assert result.title == "Updated Title"
+        assert mock_http_client.post.call_args.kwargs["data"] == {
+            "id": "don:core:issue:123",
+            "title": "Updated Title",
+        }
+
+    @pytest.mark.parametrize("custom_fields", [{"tnt__release_notes": "Fixed"}, {}])
+    def test_update_work_custom_fields(
+        self,
+        mock_http_client: MagicMock,
+        sample_work_data: dict[str, Any],
+        custom_fields: dict[str, Any],
+    ) -> None:
+        mock_http_client.post.return_value = create_mock_response(
+            {"work": {**sample_work_data, "custom_fields": custom_fields}}
+        )
+
+        result = WorksService(mock_http_client).update(
+            sample_work_data["id"],
+            custom_fields=custom_fields,
+            custom_schema_spec=CustomSchemaSpec(tenant_fragment=True),
+        )
+
+        assert result.custom_fields == custom_fields
+        mock_http_client.post.assert_called_once_with(
+            "/works.update",
+            data={
+                "id": sample_work_data["id"],
+                "custom_fields": custom_fields,
+                "custom_schema_spec": {"tenant_fragment": True},
+            },
+        )
 
     def test_update_work_applies_to_part(
         self,
@@ -639,6 +671,36 @@ class TestAsyncListSince:
         _, kwargs = mock_async_client.post.call_args
         assert kwargs["data"]["applies_to_part"] == "PROD-2"
         assert kwargs["data"]["id"] == "don:core:issue:123"
+
+    @pytest.mark.asyncio
+    async def test_async_update_work_custom_fields(self, sample_work_data: dict[str, Any]) -> None:
+        custom_fields = {"ctype_bug__regression": False, "app_tracker__labels": ["first", "next"]}
+        mock_async_client = AsyncMock()
+        mock_async_client.post.return_value = create_mock_response(
+            {"work": {**sample_work_data, "custom_fields": custom_fields}}
+        )
+
+        result = await AsyncWorksService(mock_async_client).update(
+            sample_work_data["id"],
+            custom_fields=custom_fields,
+            custom_schema_spec=CustomSchemaSpec(
+                subtype="bug", apps=["tracker"], validate_required_fields=False
+            ),
+        )
+
+        assert result.custom_fields == custom_fields
+        mock_async_client.post.assert_awaited_once_with(
+            "/works.update",
+            data={
+                "id": sample_work_data["id"],
+                "custom_fields": custom_fields,
+                "custom_schema_spec": {
+                    "subtype": "bug",
+                    "apps": ["tracker"],
+                    "validate_required_fields": False,
+                },
+            },
+        )
 
 
 class TestIsBeforeCutoffHelper:
