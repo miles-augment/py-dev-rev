@@ -5,9 +5,14 @@ import json
 import httpx
 import pytest
 import respx
+from pydantic import ValidationError
 
 from devrev import AsyncDevRevClient, DevRevClient
-from devrev.models import AggregatedSchemaGetRequest, CustomSchemaSpecForRead
+from devrev.models import (
+    AggregatedSchemaGetRequest,
+    CustomFieldDefinition,
+    CustomSchemaSpecForRead,
+)
 
 
 @pytest.mark.parametrize("use_async", [False, True])
@@ -44,3 +49,12 @@ async def test_get_aggregated_schema(mock_env_vars, use_async):
     }
     assert schema.custom_fields[0].base_type == "text"
     assert schema.model_dump(exclude_none=True) == schema_payload
+
+
+def test_custom_field_definition_rejects_missing_field_type():
+    with pytest.raises(ValidationError) as exc_info:
+        CustomFieldDefinition.model_validate({"name": "tnt__jira_issue_keys"})
+
+    error = exc_info.value.errors()[0]
+    assert error["loc"] == ("field_type",)
+    assert error["type"] == "missing"

@@ -40,3 +40,19 @@ async def test_lookup_schema_and_custom_field_over_mcp(mock_env_vars):
         {"leaf_type": "ticket"},
         {"leaf_type": "ticket"},
     ]
+
+
+async def test_schema_lookup_reports_devrev_server_error(mock_env_vars, monkeypatch):
+    monkeypatch.setenv("DEVREV_MAX_RETRIES", "0")
+    with respx.mock as router:
+        route = router.post("https://api.test.devrev.ai/schemas.aggregated.get").mock(
+            return_value=httpx.Response(500, json={"message": "Schema lookup failed"})
+        )
+        async with create_connected_server_and_client_session(mcp, timedelta(seconds=5)) as session:
+            result = await session.call_tool(
+                "devrev_schemas_aggregated_get", {"leaf_type": "ticket"}
+            )
+
+    assert route.call_count == 1
+    assert result.isError
+    assert "DevRev server error: Schema lookup failed" in result.content[0].text

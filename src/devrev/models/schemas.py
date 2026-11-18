@@ -28,7 +28,7 @@ class CustomFieldDefinition(DevRevResponseModel):
     model_config = ConfigDict(extra="allow")
 
     name: str
-    field_type: str | None = None
+    field_type: str
     base_type: str | None = None
 
 
