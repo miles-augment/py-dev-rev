@@ -211,6 +211,9 @@ class WorksUpdateRequest(DevRevBaseModel):
     custom_fields: dict[str, Any] | None = Field(
         default=None, description="Custom fields to update"
     )
+    custom_schema_spec: CustomSchemaSpec | None = Field(
+        default=None, description="Schema fragments defining the custom fields to update"
+    )
     # Issue-specific
     priority: IssuePriority | None = Field(default=None, description="New priority")
     # Ticket-specific

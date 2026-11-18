@@ -9,6 +9,7 @@ from typing import Any
 from mcp.server.fastmcp import Context
 
 from devrev.exceptions import DevRevError
+from devrev.models.base import CustomSchemaSpec
 from devrev.models.works import IssuePriority, TicketSeverity, WorkType
 from devrev_mcp.server import _config, mcp
 from devrev_mcp.utils.don_id import validate_don_id
@@ -179,6 +180,8 @@ if _config.enable_destructive_tools:
         owned_by: list[str] | None = None,
         priority: str | None = None,
         severity: str | None = None,
+        custom_fields: dict[str, Any] | None = None,
+        custom_schema_spec: CustomSchemaSpec | None = None,
     ) -> dict[str, Any]:
         """Update an existing DevRev work item (ticket, issue, or task).
 
@@ -191,6 +194,11 @@ if _config.enable_destructive_tools:
             owned_by: New list of owner user IDs.
             priority: New issue priority: P0, P1, P2, P3.
             severity: New ticket severity: BLOCKER, HIGH, MEDIUM, LOW.
+            custom_fields: Custom field values keyed by DevRev API name, e.g.
+                {"tnt__release_notes": "Fixed"}.
+            custom_schema_spec: Required by DevRev when setting custom fields. Use
+                {"tenant_fragment": true} for tnt__ fields, subtype for subtype
+                fields, or apps for app fields.
         """
         validate_don_id(id, ["work", "ticket", "issue"], "devrev_works_update")
         app = ctx.request_context.lifespan_context
@@ -223,6 +231,8 @@ if _config.enable_destructive_tools:
                 owned_by=owned_by,
                 priority=issue_priority,
                 severity=ticket_severity,
+                custom_fields=custom_fields,
+                custom_schema_spec=custom_schema_spec,
             )
             return serialize_model(work)
         except DevRevError as e:

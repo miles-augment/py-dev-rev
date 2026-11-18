@@ -103,6 +103,27 @@ response = client.works.update(
 )
 ```
 
+### Update Custom Fields
+
+Use the prefixed DevRev field names and declare the corresponding fragments in
+`custom_schema_spec`. For example, an organization-specific `tnt__` field uses
+`tenant_fragment=True`. For subtype and app fields, supply `subtype` and `apps`,
+respectively. See [DevRev's customization guide](https://developer.devrev.ai/guides/object-customization#custom-field-naming-and-prefixes).
+
+```python
+from devrev.models import CustomSchemaSpec
+
+work = client.works.update(
+    id="ISS-123",
+    custom_fields={"tnt__release_notes": "Fixed the dashboard error."},
+    custom_schema_spec=CustomSchemaSpec(tenant_fragment=True),
+)
+```
+
+`AsyncDevRevClient.works.update` takes the same arguments. For the
+`devrev_works_update` MCP tool (when writes are enabled), pass the schema spec as
+an object, for example `{"tenant_fragment": true}`.
+
 ### Delete Work Item
 
 ```python

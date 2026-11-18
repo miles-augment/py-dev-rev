@@ -9,7 +9,7 @@ from collections.abc import Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from devrev.models.base import StageUpdate
+from devrev.models.base import CustomSchemaSpec, StageUpdate
 from devrev.models.works import (
     IssuePriority,
     TicketSeverity,
@@ -200,6 +200,8 @@ class WorksService(BaseService):
         priority: IssuePriority | None = None,
         severity: TicketSeverity | None = None,
         target_close_date: datetime | None = None,
+        custom_fields: dict[str, Any] | None = None,
+        custom_schema_spec: CustomSchemaSpec | None = None,
     ) -> Work:
         """Update a work item.
 
@@ -213,6 +215,8 @@ class WorksService(BaseService):
             priority: New priority (for issues)
             severity: New severity (for tickets)
             target_close_date: New target close date
+            custom_fields: Custom field values keyed by their DevRev API names
+            custom_schema_spec: Schema fragments defining the supplied custom fields
 
         Returns:
             The updated Work item
@@ -228,6 +232,8 @@ class WorksService(BaseService):
             priority=priority,
             severity=severity,
             target_close_date=target_close_date,
+            custom_fields=custom_fields,
+            custom_schema_spec=custom_schema_spec,
         )
         response = self._post("/works.update", request, WorksUpdateResponse)
         return response.work
@@ -478,6 +484,8 @@ class AsyncWorksService(AsyncBaseService):
         owned_by: Sequence[str] | None = None,
         priority: IssuePriority | None = None,
         severity: TicketSeverity | None = None,
+        custom_fields: dict[str, Any] | None = None,
+        custom_schema_spec: CustomSchemaSpec | None = None,
     ) -> Work:
         """Update a work item.
 
@@ -489,6 +497,8 @@ class AsyncWorksService(AsyncBaseService):
             owned_by: New owner IDs
             priority: New priority (for issues)
             severity: New severity (for tickets)
+            custom_fields: Custom field values keyed by their DevRev API names
+            custom_schema_spec: Schema fragments defining the supplied custom fields
 
         Returns:
             The updated Work item
@@ -502,6 +512,8 @@ class AsyncWorksService(AsyncBaseService):
             owned_by=owned_by_update,
             priority=priority,
             severity=severity,
+            custom_fields=custom_fields,
+            custom_schema_spec=custom_schema_spec,
         )
         response = await self._post("/works.update", request, WorksUpdateResponse)
         return response.work
