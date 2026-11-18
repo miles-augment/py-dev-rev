@@ -5,11 +5,12 @@
 # =============================================================================
 FROM python:3.11-slim AS builder
 
-# Set environment variables for Python
+COPY --from=ghcr.io/astral-sh/uv:0.11.24 /uv /usr/local/bin/uv
+
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    UV_PYTHON_DOWNLOADS=never
 
 # Install build dependencies
 RUN apt-get update && \
@@ -21,15 +22,13 @@ RUN apt-get update && \
 # Set working directory
 WORKDIR /build
 
-# Copy only dependency files first for better layer caching
-COPY pyproject.toml ./
+# Cache locked dependencies separately from the source code.
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --no-dev --extra mcp --no-install-project
+
 COPY README.md ./
-
-# Copy source code
 COPY src/ ./src/
-
-# Install the package with MCP extras
-RUN pip install --no-cache-dir ".[mcp]"
+RUN uv sync --locked --no-dev --extra mcp --no-editable
 
 # =============================================================================
 # Runtime Stage: Slim production image
@@ -49,7 +48,7 @@ LABEL maintainer="Matthew G. Monteleone <matthewm@augmentcode.com>" \
 # Set environment variables for Python
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PATH="/home/mcp/.local/bin:$PATH"
+    PATH="/opt/venv/bin:/home/mcp/.local/bin:$PATH"
 
 # Install runtime dependencies (curl for healthcheck)
 RUN apt-get update && \
@@ -65,9 +64,7 @@ RUN useradd -m -u 1000 -s /bin/bash mcp && \
 # Set working directory
 WORKDIR /app
 
-# Copy Python packages from builder
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin/devrev-mcp-server /usr/local/bin/devrev-mcp-server
+COPY --from=builder /opt/venv /opt/venv
 
 # Switch to non-root user
 USER mcp

@@ -7,6 +7,22 @@ on:
     branches: [main]
 
 jobs:
+  docker-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build and smoke-test the MCP image
+        run: |
+          docker build --tag devrev-mcp:ci .
+          container=$(docker run --detach --publish 127.0.0.1:8080:8080 devrev-mcp:ci)
+          trap 'docker rm --force "$container"' EXIT
+          if ! curl --fail --silent --show-error --retry 15 --retry-delay 1 \
+            --retry-all-errors --max-time 5 http://127.0.0.1:8080/health; then
+            docker logs "$container"
+            exit 1
+          fi
+
   test:
     runs-on: ubuntu-latest
     strategy:
