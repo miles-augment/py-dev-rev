@@ -37,6 +37,16 @@ issues (engineering), and tasks.
 - `limit` (on `*_list_modified_since` / `*_list_created_since`): Hard cap on
   total items returned across all pages.
 
+### Schemas
+
+| Tool | Description |
+|------|-------------|
+| `devrev_schemas_aggregated_get` | Read the effective DevRev schema for an object type, or find a custom field's definition by exact API name |
+
+For example, pass `leaf_type: "ticket"` and `field_name: "tnt__jira_issue_keys"`
+to inspect the field's type. Omit `field_name` to return the full schema. This
+read-only tool is available when write tools are disabled.
+
 ### Accounts
 
 | Tool | Description |
